@@ -1,29 +1,27 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./style/globals.css";
-import Navbar from "@/components/layout/Navbar"; 
-import Footer from "@/components/layout/Footer"; 
-import { Toaster } from "@/components/ui/sonner"
+import "../app/globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Jelajahi Banda Aceh",
-  description: "Platform Digital Pariwisata Kota Banda Aceh",
+  title: "Platform Digital Pariwisata Banda Aceh",
+  description: "Jelajahi Pesona Otentik Banda Aceh",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="id">
       <body className={inter.className}>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        {/* Root layout ini sekarang hanya berisi body dan children */}
+        {/* Layout spesifik (publik atau admin) akan dimasukkan di sini */}
+        {children}
         <Toaster richColors />
       </body>
     </html>
