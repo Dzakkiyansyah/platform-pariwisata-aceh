@@ -10,12 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { deleteNews } from "@/app/(admin)/admin/berita/tambah/actions"; // Impor action hapus
+import { deleteNews } from "@/app/(admin)/admin/berita/actions"; 
+// --------------------------------------------------
 import { toast } from "sonner";
 import { useTransition } from "react";
 import Link from "next/link";
 
-// Tipe data untuk berita yang diterima
 type News = {
     id: number;
     title: string;
@@ -40,7 +40,7 @@ export default function NewsActions({ news }: { news: News }) {
                 }
             });
         }
-    } 
+    }
 
     return (
         <DropdownMenu>
@@ -53,7 +53,6 @@ export default function NewsActions({ news }: { news: News }) {
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                 <DropdownMenuItem asChild>
-                    {/* Nanti akan mengarah ke /admin/berita/edit/[id] */}
                     <Link href="#">Edit</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

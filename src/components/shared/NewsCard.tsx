@@ -24,38 +24,40 @@ const NewsCard = ({
 }: NewsCardProps) => {
   return (
     <Link href={`/berita/${slug}`} className="group">
-      {/* Perubahan di sini: tambahkan h-full flex flex-col */}
-      <Card className="w-full h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        {/* Gambar Berita (Tidak berubah) */}
+      <Card className="w-full h-full flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+        {/* Gambar Berita */}
         <CardHeader className="p-0">
-          <div className="relative h-52 w-full">
+          <div className="relative aspect-[16/9] w-full overflow-hidden">
             <Image
               src={imageUrl}
               alt={title}
-              layout="fill"
-              objectFit="cover"
-              className="group-hover:scale-105 transition-transform duration-300"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
             />
+            {/* Overlay gradient agar gambar terlihat lebih dramatis */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
           </div>
         </CardHeader>
 
-        {/* Perubahan di sini: tambahkan flex-grow */}
-        <CardContent className="p-4 flex flex-col flex-grow">
+        {/* Isi Card */}
+        <CardContent className="p-5 flex flex-col flex-grow">
           <div className="flex-grow">
-            <CardTitle className="text-lg leading-tight mb-2 group-hover:text-blue-700 transition-colors">
+            <CardTitle className="text-lg font-semibold leading-tight mb-2 group-hover:text-blue-700 transition-colors">
               {title}
             </CardTitle>
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+            <p className="text-sm text-gray-600 line-clamp-3 mb-4">
               {excerpt}
             </p>
           </div>
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t mt-auto">
+
+          {/* Footer */}
+          <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100 mt-auto">
             <div className="flex items-center">
-              <UserCircle className="w-4 h-4 mr-2" />
+              <UserCircle className="w-4 h-4 mr-1.5 text-gray-400" />
               <span>{author}</span>
             </div>
             <div className="flex items-center">
-              <CalendarDays className="w-4 h-4 mr-2" />
+              <CalendarDays className="w-4 h-4 mr-1.5 text-gray-400" />
               <span>{date}</span>
             </div>
           </div>

@@ -18,17 +18,23 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
 
     const slug = title.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/[^\w-]+/g, '');
     const fileName = `${Date.now()}-${imageFile.name}`;
-    const filePath = `public/${fileName}`;
+    
+    // --- INI PERBAIKAN UTAMANYA ---
+    // Pastikan filePath HANYA berisi nama file, TANPA embel-embel folder apapun.
+    const filePath = fileName;
+    // ----------------------------
 
+    // 1. Upload gambar ke root bucket
     const { error: uploadError } = await supabase.storage
         .from('gambar-berita')
         .upload(filePath, imageFile);
 
     if (uploadError) {
         console.error('Storage Error:', uploadError);
-        return { error: 'Gagal mengunggah gambar. Pastikan izin (policy) di storage sudah benar.' };
+        return { error: 'Gagal mengunggah gambar.' };
     }
 
+    // 2. Dapatkan URL publik dari root bucket
     const { data } = supabase.storage
         .from('gambar-berita')
         .getPublicUrl(filePath);
@@ -39,6 +45,7 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
         return { error: 'Gagal mendapatkan URL publik gambar.' };
     }
 
+    // 3. Simpan URL yang sudah benar ke database
     const { error: insertError } = await supabase.from('news').insert({
         title,
         slug,
@@ -57,32 +64,15 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
     redirect('/admin/berita');
 }
 
-// --- FUNGSI BARU UNTUK MENGHAPUS BERITA ---
+// ... (fungsi deleteNews tidak perlu diubah, tapi pastikan juga path-nya benar)
 export async function deleteNews(newsId: number, imagePath: string) {
     const supabase = await createClient();
+    const { error: deleteError } = await supabase.from('news').delete().eq('id', newsId);
+    if (deleteError) return { error: 'Gagal menghapus berita dari database.' };
 
-    // 1. Hapus data dari tabel 'news'
-    const { error: deleteError } = await supabase
-        .from('news')
-        .delete()
-        .eq('id', newsId);
-
-    if (deleteError) {
-        return { error: 'Gagal menghapus berita dari database.' };
-    }
-
-    // 2. Hapus file gambar dari Storage
-    // Ekstrak nama file dari URL lengkap
     const fileName = imagePath.split('/').pop();
     if (fileName) {
-        const { error: storageError } = await supabase.storage
-            .from('gambar-berita')
-            .remove([`public/${fileName}`]);
-        
-        if (storageError) {
-            // Jangan gagalkan proses jika hanya gagal hapus file, cukup catat errornya
-            console.error("Storage Delete Error:", storageError);
-        }
+        await supabase.storage.from('gambar-berita').remove([fileName]);
     }
 
     revalidatePath('/admin/berita');

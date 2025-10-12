@@ -2,9 +2,20 @@
 const nextConfig = {
     experimental: {
         serverActions: {
-            // Naikkan batas ukuran body menjadi 10 MB
             bodySizeLimit: '10mb',
         },
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                // Pastikan hostname ini sesuai dengan proyek Anda
+                hostname: 'lytxgujwpbloelmvvjej.supabase.co', 
+                port: '',
+                // Gunakan pathname yang lebih umum ini
+                pathname: '/storage/v1/object/public/**', 
+            },
+        ],
     },
 };
 

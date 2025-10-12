@@ -107,7 +107,13 @@ export default function LoginForm() {
                 </div>
                 {/* Sisi Kanan - Gambar */}
                 <div className="hidden md:block w-1/2 relative bg-gray-200">
-                    <Image src="/images/hero-background.jpg" alt="Masjid Raya Baiturrahman" fill className="object-cover" priority />
+                <Image
+                    src="/images/hero-background.jpg" 
+                    alt="Masjid Raya Baiturrahman"
+                    fill 
+                    className="object-cover" 
+                    priority
+                />
                 </div>
             </div>
         </div>

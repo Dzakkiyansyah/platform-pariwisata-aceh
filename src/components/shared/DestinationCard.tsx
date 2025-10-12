@@ -34,8 +34,7 @@ const DestinationCard = ({
             <Image
               src={imageUrl}
               alt={name}
-              layout="fill"
-              objectFit="cover"
+              fill
               className="group-hover:scale-105 transition-transform duration-300"
             />
           </div>

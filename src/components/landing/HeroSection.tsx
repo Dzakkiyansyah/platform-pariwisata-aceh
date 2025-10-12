@@ -10,7 +10,8 @@ const HeroSection = () => {
   src="/images/hero-background.jpg"
   fill
   alt="Hero background"
-  className="object-cover"
+  className="object-cover brightness-50"
+  priority
 />
 
 
