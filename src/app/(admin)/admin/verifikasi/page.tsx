@@ -4,22 +4,31 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import VerificationActions from "@/components/admin/VerificationActions";
 
+// 1. Definisikan tipe (label) seperti sebelumnya. Ini sudah benar.
+type Pendaftar = {
+    id: number;
+    profile_id: string;
+    nama_usaha: string;
+    dokumen_pendukung_path: string;
+    created_at: string;
+    full_name: string | null;
+    email: string | null;
+};
+
 export default async function VerifikasiPage() {
-    // ✅ Perbaikan: tambahkan await di sini
     const supabase = await createClient();
 
-    // Ambil data pengelola yang statusnya masih 'pending'
-    const { data: pendaftar, error } = await supabase
-        .from('pengelola_details')
-        .select(`
-            *,
-            profiles ( full_name, email )
-        `)
-        .eq('status_verifikasi', 'pending');
+    // 2. Lakukan panggilan RPC seperti biasa, TANPA <Pendaftar>
+    const { data, error } = await supabase
+        .rpc('get_pending_pengelola');
 
     if (error) {
-        console.error("Error fetching pending users:", error);
+        console.error("Error fetching pending users via RPC:", error);
     }
+    
+    // 3. Setelah data didapat, kita beritahu TypeScript bentuknya.
+    // Ini akan menyelesaikan kedua error.
+    const pendaftar: Pendaftar[] = data || [];
 
     return (
         <div className="space-y-6">
@@ -49,11 +58,12 @@ export default async function VerifikasiPage() {
                         </TableHeader>
                         <TableBody>
                             {pendaftar && pendaftar.length > 0 ? (
-                                pendaftar.map((item: any) => (
+                                // Sekarang TypeScript tahu bahwa 'item' adalah Pendaftar
+                                pendaftar.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell>
-                                            <div className="font-medium">{item.profiles.full_name}</div>
-                                            <div className="text-sm text-muted-foreground">{item.profiles.email}</div>
+                                            <div className="font-medium">{item.full_name}</div>
+                                            <div className="text-sm text-muted-foreground">{item.email}</div>
                                         </TableCell>
                                         <TableCell>{item.nama_usaha}</TableCell>
                                         <TableCell>

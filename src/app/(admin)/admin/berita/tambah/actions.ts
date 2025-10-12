@@ -1,49 +1,49 @@
-// src/app/(admin)/admin/berita/tambah/actions.ts
 'use server'
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { type ActionState } from "@/types/actions";
 
-export async function addNews(formData: FormData) {
-    const supabase = createClient();
+export async function addNews(prevState: ActionState, formData: FormData): Promise<ActionState> {
+    const supabase = await createClient();
 
     const title = formData.get('title') as string;
     const content = formData.get('content') as string;
     const imageFile = formData.get('image') as File;
 
-    if (!title || !content || !imageFile) {
+    if (!title || !content || imageFile.size === 0) {
         return { error: 'Semua field wajib diisi.' };
     }
 
-    // Buat slug otomatis
     const slug = title.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    
-    // Buat nama file yang unik untuk menghindari konflik
     const fileName = `${Date.now()}-${imageFile.name}`;
     const filePath = `public/${fileName}`;
 
-    // 1. Upload gambar ke Storage
     const { error: uploadError } = await supabase.storage
         .from('gambar-berita')
         .upload(filePath, imageFile);
 
     if (uploadError) {
         console.error('Storage Error:', uploadError);
-        return { error: 'Gagal mengunggah gambar.' };
+        return { error: 'Gagal mengunggah gambar. Pastikan izin (policy) di storage sudah benar.' };
     }
 
-    // 2. Dapatkan URL publik dari gambar yang di-upload
-    const { data: { publicUrl } } = supabase.storage
+    const { data } = supabase.storage
         .from('gambar-berita')
         .getPublicUrl(filePath);
+    
+    const publicUrl = data.publicUrl;
 
-    // 3. Simpan data berita ke database
+    if (!publicUrl) {
+        return { error: 'Gagal mendapatkan URL publik gambar.' };
+    }
+
     const { error: insertError } = await supabase.from('news').insert({
         title,
         slug,
         content,
-        image_path: publicUrl, // Simpan URL publiknya
+        image_path: publicUrl,
     });
 
     if (insertError) {
@@ -51,10 +51,41 @@ export async function addNews(formData: FormData) {
         return { error: 'Gagal menyimpan berita ke database.' };
     }
 
-    // Revalidasi halaman daftar berita agar data baru muncul
     revalidatePath('/admin/berita');
-    revalidatePath('/'); // Revalidasi landing page juga
-
-    // Redirect kembali ke halaman daftar berita setelah berhasil
+    revalidatePath('/');
+    
     redirect('/admin/berita');
+}
+
+// --- FUNGSI BARU UNTUK MENGHAPUS BERITA ---
+export async function deleteNews(newsId: number, imagePath: string) {
+    const supabase = await createClient();
+
+    // 1. Hapus data dari tabel 'news'
+    const { error: deleteError } = await supabase
+        .from('news')
+        .delete()
+        .eq('id', newsId);
+
+    if (deleteError) {
+        return { error: 'Gagal menghapus berita dari database.' };
+    }
+
+    // 2. Hapus file gambar dari Storage
+    // Ekstrak nama file dari URL lengkap
+    const fileName = imagePath.split('/').pop();
+    if (fileName) {
+        const { error: storageError } = await supabase.storage
+            .from('gambar-berita')
+            .remove([`public/${fileName}`]);
+        
+        if (storageError) {
+            // Jangan gagalkan proses jika hanya gagal hapus file, cukup catat errornya
+            console.error("Storage Delete Error:", storageError);
+        }
+    }
+
+    revalidatePath('/admin/berita');
+    revalidatePath('/');
+    return { message: 'Berita berhasil dihapus.' };
 }

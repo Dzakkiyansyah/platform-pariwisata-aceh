@@ -60,7 +60,7 @@ const CtaSection = () => {
           </Card>
         </div>
 
-        {/* Tombol Aksi Utama */}
+        {/* CTA */}
         <div className="mt-12">
           <Button
             asChild

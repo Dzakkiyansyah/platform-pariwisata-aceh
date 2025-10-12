@@ -1,14 +1,10 @@
-// src/app/(admin)/admin/pengguna/page.tsx
-
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin"; 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+import UserActions from "@/components/admin/UserActions";
 
-// Tipe untuk data pengguna yang sudah digabung
 type UserProfile = {
     id: string;
     full_name: string | null;
@@ -17,11 +13,9 @@ type UserProfile = {
 };
 
 export default async function ManajemenPenggunaPage() {
-    const supabase = createClient();
+    const supabase = createAdminClient(); // Client admin tidak async, jadi tidak perlu await
 
-    // Mengambil data dari auth.users (untuk email)
     const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-    // Mengambil data dari public.profiles (untuk nama dan peran)
     const { data: profiles, error: profilesError } = await supabase.from('profiles').select('*');
 
     if (authError || profilesError) {
@@ -29,7 +23,6 @@ export default async function ManajemenPenggunaPage() {
         return <div>Gagal memuat data pengguna.</div>;
     }
 
-    // Gabungkan data dari auth.users dan public.profiles berdasarkan ID
     const combinedUsers: UserProfile[] = authUsers.map(authUser => {
         const profile = profiles.find(p => p.id === authUser.id);
         return {
@@ -40,7 +33,6 @@ export default async function ManajemenPenggunaPage() {
         };
     });
 
-    // Pisahkan pengguna berdasarkan peran
     const wisatawan = combinedUsers.filter(user => user.role === 'wisatawan');
     const pengelola = combinedUsers.filter(user => user.role?.startsWith('pengelola'));
 
@@ -67,12 +59,10 @@ export default async function ManajemenPenggunaPage() {
                             <TabsTrigger value="pengelola">Pengelola</TabsTrigger>
                         </TabsList>
                         
-                        {/* Tab untuk Wisatawan */}
                         <TabsContent value="wisatawan">
                             <UserTable users={wisatawan} />
                         </TabsContent>
 
-                        {/* Tab untuk Pengelola */}
                         <TabsContent value="pengelola">
                             <UserTable users={pengelola} />
                         </TabsContent>
@@ -83,8 +73,6 @@ export default async function ManajemenPenggunaPage() {
     );
 }
 
-
-// Komponen terpisah untuk menampilkan tabel pengguna
 function UserTable({ users }: { users: UserProfile[] }) {
     return (
         <Table>
@@ -104,15 +92,12 @@ function UserTable({ users }: { users: UserProfile[] }) {
                                 <div className="text-sm text-muted-foreground">{user.email}</div>
                             </TableCell>
                             <TableCell>
-                                <Badge variant={user.role === 'pengelola' ? 'default' : 'secondary'}>
+                                <Badge variant={user.role === 'pengelola' || user.role === 'admin' ? 'default' : 'secondary'}>
                                     {user.role}
                                 </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                                {/* TODO: Buat tombol aksi fungsional */}
-                                <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
+                                <UserActions user={user} />
                             </TableCell>
                         </TableRow>
                     ))

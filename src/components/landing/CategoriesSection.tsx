@@ -1,92 +1,78 @@
 // src/components/landing/CategoriesSection.tsx
+
+import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Landmark, Mountain, MoonStar } from "lucide-react";
+import { Landmark, Mountain, MoonStar, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
-// Data untuk setiap kartu kategori
-const categories = [
-  {
-    icon: Landmark,
-    title: "Wisata Sejarah & Budaya",
-    description: "Jelajahi jejak sejarah dan kekayaan budaya Aceh.",
-    count: 15,
-    href: "/destinasi?kategori=sejarah-budaya",
-  },
-  {
-    icon: Mountain,
-    title: "Wisata Alam",
-    description: "Nikmati keindahan alam yang memukau.",
-    count: 15,
-    href: "/destinasi?kategori=alam",
-  },
-  {
-    icon: MoonStar,
-    title: "Wisata Religi",
-    description: "Nikmati ketenangan spiritual yang mendalam.",
-    count: 15,
-    href: "/destinasi?kategori=religi",
-  },
-];
+// Objek slug dari database ke komponen ikon
+const iconMap: { [key: string]: React.ElementType } = {
+  'wisata-sejarah-budaya': Landmark,
+  'wisata-alam': Mountain,
+  'wisata-religi': MoonStar,
+  'wisata-kuliner': UtensilsCrossed, // Contoh jika Anda menambahkan kategori baru
+  // Tambahkan pemetaan lain jika perlu
+};
 
-const CategoriesSection = () => {
+// Komponen ini sekarang menjadi async untuk mengambil data
+export default async function CategoriesSection() {
+  const supabase = await createClient();
+
+  // Ambil data kategori dari Supabase
+  const { data: categories, error } = await supabase
+    .from('categories')
+    .select('name, slug')
+    .limit(3); // Ambil 3 kategori teratas untuk ditampilkan di landing page
+
+  if (error) {
+    console.error("Error fetching categories for landing page:", error);
+    return null; // Jangan tampilkan section jika gagal mengambil data
+  }
+
   return (
-    <section className="container mx-auto px-4 py-16"> 
+    <section className="container mx-auto py-16">
       <div className="grid md:grid-cols-2 gap-12 items-center">
-        {/* Kolom Kiri Teks Deskripsi */}
-        <div className="space-y-6">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+        {/* Kolom Kiri: Teks Deskripsi (tidak berubah) */}
+        <div className="space-y-4">
+          <h2 className="text-4xl font-bold tracking-tight">
             Temukan Pengalaman
             <br />
             Wisata Anda di Banda Aceh
           </h2>
-          <p className="text-gray-600 text-lg leading-relaxed">
-            Jelajahi beragam kategori wisata yang menarik di Banda Aceh. Dari
-            sejarah dan budaya yang kaya hingga keindahan alam yang memukau, kami
-            menyediakan semua informasi yang Anda butuhkan.
+          <p className="text-muted-foreground text-lg">
+            Jelajahi beragam kategori wisata yang menarik di Banda Aceh. Temukan pengalaman
+            yang sesuai dengan minat Anda dan rencanakan perjalanan yang tak
+            terlupakan.
           </p>
         </div>
 
-        {/* Kolom Kanan: Kartu Kategori */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {categories.map((category, index) => (
-            <Link 
-              key={index} 
-              href={category.href} 
-              className="group block h-full"
-            >
-              <Card className="h-full flex flex-col hover:border-blue-500 hover:shadow-lg transition-all duration-300 border border-gray-200">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg">
-                    <category.icon className="h-6 w-6 text-blue-600" />
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="flex-1 pb-3">
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
-                    {category.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                    {category.description}
-                  </p>
-                </CardContent>
-                
-                <CardFooter className="pt-3 border-t border-gray-100">
-                  <div className="flex justify-between items-center w-full text-sm">
-                    <span className="text-gray-500">
-                      {category.count} Destinasi
-                    </span>
-                    <span className="font-semibold text-blue-600 group-hover:underline">
-                      Jelajahi
-                    </span>
-                  </div>
-                </CardFooter>
-              </Card>
-            </Link>
-          ))}
+        {/* Kolom Kanan: Kartu Kategori (sekarang dinamis) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {categories.map((category) => {
+              // Pilih ikon berdasarkan slug, gunakan Landmark sebagai default jika tidak ditemukan
+              const IconComponent = iconMap[category.slug] || Landmark;
+              
+              return (
+                <Link key={category.slug} href={`/destinasi?category=${category.slug}`} className="group">
+                    <Card className="h-full hover:border-blue-500 hover:bg-slate-50 transition-all duration-300 flex flex-col">
+                        <CardHeader>
+                            <IconComponent className="h-10 w-10 text-blue-600" />
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <h3 className="font-semibold text-lg">{category.name}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Jelajahi destinasi dalam kategori ini.
+                            </p>
+                        </CardContent>
+                        <CardFooter>
+                            <span className="font-semibold text-blue-600 group-hover:underline text-sm">Jelajahi</span>
+                        </CardFooter>
+                    </Card>
+                </Link>
+            )})}
         </div>
       </div>
     </section>
   );
 };
-
-export default CategoriesSection;

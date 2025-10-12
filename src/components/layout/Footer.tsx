@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className="bg-[#1C2C4A] text-white">
       <div className="container mx-auto py-16 px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          {/* Kolom 1: Logo dan Deskripsi */}
+          {/* Logo dan Deskripsi */}
           <div className="md:col-span-1">
             <h3 className="font-bold text-2xl mb-4 text-white">Jelajah Aceh</h3>
             <p className="text-gray-300 text-sm leading-relaxed">
@@ -16,7 +16,7 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Kolom 2: Navigasi Cepat */}
+          {/* Navigasi  */}
           <div>
             <h4 className="font-semibold mb-6 text-white">Navigasi Cepat</h4>
             <ul className="space-y-3 text-sm">
@@ -60,7 +60,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Kolom 4: Kontak */}
+          {/* Kontak */}
           <div>
             <h4 className="font-semibold mb-6 text-white">Kontak</h4>
             <ul className="space-y-3 text-sm">

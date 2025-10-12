@@ -1,171 +1,115 @@
 'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const supabase = createClient();
 
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
+    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
 
-    if (error) {
-      toast.error(error.message || 'Email atau password salah.');
-    } else {
-      toast.success('Login berhasil!');
-      router.push('/');
-      router.refresh();
-    }
-    setIsLoading(false);
-  };
+        if (error || !data.user) {
+            toast.error(error?.message || "Email atau password salah.");
+            setIsLoading(false);
+            return;
+        }
 
-  return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Left Panel - Form */}
-      <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-8 lg:p-12">
-        <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-[15px] shadow-sm border border-gray-100">
-          {/* Back to Home Button */}
-          <Link 
-            href="/" 
-            className="inline-flex items-center text-sm text-gray-600 hover:text-[#265DE2] transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Kembali ke Beranda
-          </Link>
+        const { data: roleData, error: rpcError } = await supabase
+            .rpc('get_user_role', { user_id: data.user.id });
 
-          {/* Header */}
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-[#1C2C4A]">
-              Selamat Datang Kembali!
-            </h1>
-            <p className="text-gray-600">
-              Masuk untuk melanjutkan petualangan wisatamu di Banda Aceh
-            </p>
-          </div>
+        if (rpcError) {
+            console.error("Supabase RPC Error:", rpcError);
+            toast.error("Gagal mendapatkan data peran pengguna. Silakan coba lagi.");
+            setIsLoading(false);
+            await supabase.auth.signOut();
+            return;
+        }
 
-          {/* Login Form */}
-          <form onSubmit={handleSignIn} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Alamat Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#265DE2] focus:border-[#265DE2] placeholder-gray-400 transition-colors"
-                placeholder="nama@email.com"
-              />
+        toast.success("Login berhasil!");
+
+        const role = roleData ? String(roleData).trim() : null;
+
+        // --- LOGIKA PENGALIHAN BERDASARKAN 3 PERAN ---
+        if (role === 'admin') {
+            router.push('/admin/dashboard');
+        } else if (role === 'pengelola') {
+            router.push('/pengelola/dashboard');
+        } else {
+            router.push('/');
+        }
+        
+        router.refresh();
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+            <div className="flex w-full max-w-4xl rounded-xl overflow-hidden shadow-lg bg-white">
+                {/* Sisi Kiri - Form */}
+                <div className="w-full md:w-1/2 p-8 space-y-6 flex flex-col justify-center">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.push('/')}
+                        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 p-0 h-auto font-medium self-start"
+                    >
+                        <ArrowLeft size={18} />
+                        Kembali ke Beranda
+                    </Button>
+
+                    <div>
+                        <h1 className="text-3xl font-bold text-blue-600 mb-1">Selamat Datang</h1>
+                        <h2 className="text-3xl font-black text-gray-900 mb-4">Kembali!</h2>
+                        <p className="text-gray-600 mb-8">
+                            Masuk untuk melanjutkan petualangan wisatamu.
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSignIn} className="space-y-6">
+                        <div className="space-y-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                            <Input id="email" type="email" placeholder="Example@contoh.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500" required />
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">Lupa password?</Link>
+                            </div>
+                            <Input id="password" type="password" placeholder="********" value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500" required />
+                        </div>
+                        <Button type="submit" disabled={isLoading} className="w-full h-12 bg-gray-800 hover:bg-gray-900 text-white font-semibold text-base rounded-lg transition-colors">
+                            {isLoading ? "Memproses..." : "Login"}
+                        </Button>
+                    </form>
+                    <div className="text-center mt-6 pt-4 border-t border-gray-200">
+                        <p className="text-gray-600 text-sm">
+                            Belum punya akun?{" "}
+                            <Link href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">Daftar di sini</Link>
+                        </p>
+                    </div>
+                </div>
+                {/* Sisi Kanan - Gambar */}
+                <div className="hidden md:block w-1/2 relative bg-gray-200">
+                    <Image src="/images/hero-background.jpg" alt="Masjid Raya Baiturrahman" fill className="object-cover" priority />
+                </div>
             </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <Link 
-                  href="/forgot-password" 
-                  className="text-sm text-[#265DE2] hover:text-[#1C2C4A] transition-colors"
-                >
-                  Lupa password?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-[10px] focus:ring-2 focus:ring-[#265DE2] focus:border-[#265DE2] placeholder-gray-400 transition-colors pr-12"
-                  placeholder="Masukkan password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-<Button
-  type="submit"
-  disabled={isLoading}
-  className={`w-full rounded-[10px] font-medium transition-all duration-300 ${
-    isLoading ? 'cursor-not-allowed opacity-70' : ''
-  }`}
->
-  {isLoading ? (
-    <span className="flex items-center justify-center">
-      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-      Memproses...
-    </span>
-  ) : (
-    'Masuk ke Akun'
-  )}
-</Button>
-          </form>
-
-          {/* Footer */}
-          <div className="text-center pt-6 border-t border-gray-200">
-            <p className="text-gray-600">
-              Belum punya akun?{' '}
-              <Link 
-                href="/register" 
-                className="text-[#265DE2] hover:text-[#1C2C4A] font-semibold transition-colors"
-              >
-                Daftar di sini
-              </Link>
-            </p>
-          </div>
         </div>
-      </div>
-
-{/* Right Panel - Image */}
-<div className="hidden md:block w-1/2 relative">
-  <div className="absolute inset-0 bg-[#1C2C4A]/20 z-10 rounded-l-[15px]" />
-
-  <Image
-    src="/images/hero-background.jpg"
-    alt="Wisata Banda Aceh"
-    fill
-    priority
-    className="object-cover rounded-l-[15px]"
-  />
-
-  {/* Overlay Text */}
-  <div className="absolute bottom-8 left-8 right-8 text-white z-20">
-    <h3 className="text-2xl font-bold mb-2">Jelajahi Keindahan Banda Aceh</h3>
-    <p className="text-blue-100">
-      Temukan pengalaman wisata yang tak terlupakan di Serambi Mekah
-    </p>
-  </div>
-</div>
-
-    </div>
-  );
+    );
 }

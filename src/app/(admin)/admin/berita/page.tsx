@@ -1,5 +1,3 @@
-// src/app/(admin)/admin/berita/page.tsx
-
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,15 +5,30 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import NewsActions from "@/components/admin/NewsActions"; // <-- Impor komponen aksi
+
+// Definisikan tipe untuk data berita
+type News = {
+    id: number;
+    title: string;
+    created_at: string;
+    image_path: string | null;
+};
 
 export default async function BeritaPage() {
-    const supabase = createClient();
+    const supabase = await createClient();
 
-    // Ambil semua data dari tabel news
-    const { data: news, error } = await supabase
+    // Ambil semua kolom yang dibutuhkan, termasuk image_path
+    const { data, error } = await supabase
         .from('news')
-        .select('*')
+        .select('id, title, created_at, image_path')
         .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching news:", error);
+    }
+
+    const news: News[] = data || [];
 
     return (
         <div className="space-y-6">
@@ -52,19 +65,15 @@ export default async function BeritaPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {news && news.length > 0 ? (
+                            {news.length > 0 ? (
                                 news.map(item => (
                                     <TableRow key={item.id}>
                                         <TableCell className="font-medium">{item.title}</TableCell>
-                                        <TableCell>
-                                            {/* Nanti kita akan tambahkan kolom status di DB */}
-                                            <Badge>Published</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {new Date(item.created_at).toLocaleDateString('id-ID', { dateStyle: 'long' })}
-                                        </TableCell>
+                                        <TableCell><Badge>Published</Badge></TableCell>
+                                        <TableCell>{new Date(item.created_at).toLocaleDateString('id-ID', { dateStyle: 'long' })}</TableCell>
                                         <TableCell className="text-right">
-                                            {/* TODO: Tambah tombol Edit & Hapus */}
+                                            {/* Ganti placeholder dengan komponen aksi */}
+                                            <NewsActions news={item} />
                                         </TableCell>
                                     </TableRow>
                                 ))

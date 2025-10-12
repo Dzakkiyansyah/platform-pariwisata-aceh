@@ -3,12 +3,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+DropdownMenu,
+DropdownMenuContent,
+DropdownMenuItem,
+DropdownMenuLabel,
+DropdownMenuSeparator,
+DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { updateDestinationStatus } from "@/app/(admin)/admin/destinasi/actions";
@@ -56,11 +56,11 @@ export default function DestinationActions({ destination }: { destination: Desti
                     </DropdownMenuItem>
                 )}
                 {destination.status === 'published' && (
-                     <DropdownMenuItem 
+                    <DropdownMenuItem 
                         disabled={isPending}
                         onSelect={() => handleStatusChange('archived')}
                         className="text-red-600"
-                     >
+                    >
                         Arsipkan / Bekukan
                     </DropdownMenuItem>
                 )}

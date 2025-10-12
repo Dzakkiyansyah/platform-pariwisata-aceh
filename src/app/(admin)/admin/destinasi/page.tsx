@@ -1,44 +1,36 @@
 // src/app/(admin)/admin/destinasi/page.tsx
 
 import { createClient } from "@/lib/supabase/server";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
 import DestinationActions from "@/components/admin/DestinationActions";
 
-export default async function ManajemenDestinasiPage() {
-  const supabase = createClient();
+// ✅ Perbaikan tipe data agar cocok dengan hasil relasi Supabase
+type DestinationWithRelations = {
+  id: number;
+  name: string;
+  status: string;
+  categories: { name: string }[]; // array karena hasil relasi
+  profiles: { full_name: string | null }[]; // array juga
+};
 
-  // Ambil data destinasi dan relasinya ke kategori serta profil pengelola
-  const { data: destinations, error } = await supabase
+export default async function ManajemenDestinasiPage() {
+  // --- Buat koneksi Supabase ---
+  const supabase = await createClient();
+
+  // --- Ambil data dengan relasi ---
+  const { data, error } = await supabase
     .from("destinations")
-    .select(`
-      id,
-      name,
-      status,
-      categories ( name ),
-      profiles ( full_name )
-    `)
+    .select(`id, name, status, categories ( name ), profiles ( full_name )`)
     .order("name", { ascending: true });
 
   if (error) {
     console.error("Error fetching destinations:", error);
+    return <div className="p-8">Terjadi kesalahan saat memuat data destinasi.</div>;
   }
+
+  const destinations: DestinationWithRelations[] = data || [];
 
   return (
     <div className="space-y-6">
@@ -56,6 +48,7 @@ export default async function ManajemenDestinasiPage() {
             Berikut adalah daftar semua destinasi yang ada di database.
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -67,31 +60,27 @@ export default async function ManajemenDestinasiPage() {
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {destinations && destinations.length > 0 ? (
-                destinations.map((dest: any) => (
+              {destinations.length > 0 ? (
+                destinations.map((dest) => (
                   <TableRow key={dest.id}>
                     <TableCell className="font-medium">{dest.name}</TableCell>
-                    <TableCell>{dest.categories?.name || "N/A"}</TableCell>
+
+                    {/* ✅ ambil nama kategori pertama (kalau ada) */}
+                    <TableCell>{dest.categories?.[0]?.name || "N/A"}</TableCell>
+
+                    {/* ✅ ambil nama pengelola pertama (kalau ada) */}
+                    <TableCell>{dest.profiles?.[0]?.full_name || "Dinas Pariwisata"}</TableCell>
+
                     <TableCell>
-                      {dest.profiles?.full_name || "Dinas Pariwisata"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          dest.status === "published" ? "default" : "secondary"
-                        }
-                      >
+                      <Badge variant={dest.status === "published" ? "default" : "secondary"}>
                         {dest.status}
                       </Badge>
                     </TableCell>
+
                     <TableCell className="text-right">
-                      {/* TODO: Buat tombol aksi fungsional */}
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                      {/* Atau ganti dengan komponen DestinationActions */}
-                      {/* <DestinationActions id={dest.id} /> */}
+                      <DestinationActions destination={dest} />
                     </TableCell>
                   </TableRow>
                 ))

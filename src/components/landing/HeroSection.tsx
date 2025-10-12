@@ -6,14 +6,14 @@ import Link from "next/link";
 const HeroSection = () => {
   return (
     <section className="relative h-[600px] flex items-center justify-center text-white">
-      {/* Gambar Latar Belakang */}
-      <Image
-        src="/images/hero-background.jpg" // <-- Ganti dengan gambar Anda di public/images
-        alt="Museum Aceh"
-        layout="fill"
-        objectFit="cover"
-        className="brightness-50" // <-- Memberi efek gelap pada gambar
-      />
+<Image
+  src="/images/hero-background.jpg"
+  fill
+  alt="Hero background"
+  className="object-cover"
+/>
+
+
 
       {/* Konten Teks */}
       <div className="relative z-10 text-center space-y-4 px-4">
