@@ -1,7 +1,5 @@
-// src/components/admin/RecentActivities.tsx
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// 1. Definisikan tipe yang lebih spesifik untuk ulasan dengan data profil
 type ReviewWithProfile = {
   id: number;
   comment: string | null;
@@ -11,7 +9,6 @@ type ReviewWithProfile = {
   } | null;
 };
 
-// 2. Gunakan tipe baru ini untuk props
 export default function RecentActivities({ reviews }: { reviews: ReviewWithProfile[] | null }) {
   if (!reviews || reviews.length === 0) {
     return <p className="text-sm text-muted-foreground">Belum ada aktivitas terbaru.</p>;

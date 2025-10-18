@@ -1,5 +1,3 @@
-// src/components/shared/ReviewCard.tsx
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
@@ -8,8 +6,8 @@ import { Star } from "lucide-react";
 interface ReviewCardProps {
   text: string;
   rating: number;
-  author: string; // Akan berisi nama dari profil atau anonymous_name
-  avatarUrl?: string | null; // Avatar opsional
+  author: string
+  avatarUrl?: string | null;
 }
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -31,7 +29,7 @@ const ReviewCard = ({ text, author, avatarUrl, rating }: ReviewCardProps) => {
       <CardContent className="p-6">
         <StarRating rating={rating} />
         <blockquote className="mt-4 text-lg font-semibold leading-snug">
-          "{text}"
+          &quot;{text}&quot;
         </blockquote>
       </CardContent>
       <div className="flex items-center gap-4 p-6 pt-0 mt-auto">

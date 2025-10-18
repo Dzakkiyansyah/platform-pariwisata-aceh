@@ -1,4 +1,3 @@
-// src/components/admin/UserActions.tsx
 'use client'
 
 import { Button } from "@/components/ui/button";

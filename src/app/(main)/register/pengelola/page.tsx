@@ -1,4 +1,3 @@
-// src/app/register/pengelola/page.tsx
 import RegisterPengelolaForm from "@/components/auth/RegisterPengelolaForm";
 
 export default function RegisterPengelolaPage() {

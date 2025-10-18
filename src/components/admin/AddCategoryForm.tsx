@@ -1,4 +1,3 @@
-// src/components/admin/AddCategoryForm.tsx
 'use client'
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { addCategory } from "@/app/(admin)/admin/kategori/actions";
 import { toast } from "sonner";
 import { useRef } from "react";
 
-// Tombol ini akan otomatis menampilkan status "pending" saat form disubmit
+// set status "pending"
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
@@ -27,7 +26,6 @@ export default function AddCategoryForm() {
             toast.error(result.error);
         } else {
             toast.success("Kategori berhasil ditambahkan!");
-            // Reset form setelah berhasil
             formRef.current?.reset();
         }
     }

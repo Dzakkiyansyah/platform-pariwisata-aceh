@@ -13,7 +13,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default async function KategoriPage() {
-    // ✅ Perbaikan: tambahkan await karena createClient() async
     const supabase = await createClient();
 
     const { data: categories, error } = await supabase
@@ -22,7 +21,7 @@ export default async function KategoriPage() {
         .order('name', { ascending: true });
 
     if (error) {
-      console.error("Error fetching categories:", error);
+        console.error("Error fetching categories:", error);
     }
 
     return (

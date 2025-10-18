@@ -1,5 +1,3 @@
-// src/components/reviews/ReviewList.tsx
-
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";

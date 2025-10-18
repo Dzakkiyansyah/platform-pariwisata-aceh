@@ -21,7 +21,7 @@ export default function FilterControls({ categories }: FilterControlsProps) {
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  // Fungsi untuk menangani pencarian dengan debounce (menunggu user selesai mengetik)
+  // Fungsi untuk menangani pencarian dengan debounce
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
     if (term) {
@@ -30,7 +30,7 @@ export default function FilterControls({ categories }: FilterControlsProps) {
       params.delete("q");
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 300); // <-- Jeda 300ms
+  }, 300); // 300ms debounce
 
   // Fungsi untuk menangani perubahan kategori
   const handleCategoryChange = (category: string) => {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import NewsActions from "@/components/admin/NewsActions"; // <-- Impor komponen aksi
+import NewsActions from "@/components/admin/NewsActions"; 
 
 // Definisikan tipe untuk data berita
 type News = {

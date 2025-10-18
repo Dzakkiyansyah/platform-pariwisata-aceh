@@ -1,4 +1,3 @@
-// src/components/layout/Footer.tsx
 import Link from "next/link";
 
 const Footer = () => {
@@ -43,7 +42,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Kolom 3: Untuk Mitra */}
+          {/*  untuk Mitra */}
           <div>
             <h4 className="font-semibold mb-6 text-white">Untuk Mitra</h4>
             <ul className="space-y-3 text-sm">

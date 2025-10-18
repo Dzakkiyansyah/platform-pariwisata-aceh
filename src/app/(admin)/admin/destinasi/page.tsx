@@ -1,18 +1,15 @@
-// src/app/(admin)/admin/destinasi/page.tsx
-
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import DestinationActions from "@/components/admin/DestinationActions";
 
-// ✅ Perbaikan tipe data agar cocok dengan hasil relasi Supabase
 type DestinationWithRelations = {
   id: number;
   name: string;
   status: string;
-  categories: { name: string }[]; // array karena hasil relasi
-  profiles: { full_name: string | null }[]; // array juga
+  categories: { name: string }[]; 
+  profiles: { full_name: string | null }[]; 
 };
 
 export default async function ManajemenDestinasiPage() {
@@ -66,11 +63,7 @@ export default async function ManajemenDestinasiPage() {
                 destinations.map((dest) => (
                   <TableRow key={dest.id}>
                     <TableCell className="font-medium">{dest.name}</TableCell>
-
-                    {/* ✅ ambil nama kategori pertama (kalau ada) */}
                     <TableCell>{dest.categories?.[0]?.name || "N/A"}</TableCell>
-
-                    {/* ✅ ambil nama pengelola pertama (kalau ada) */}
                     <TableCell>{dest.profiles?.[0]?.full_name || "Dinas Pariwisata"}</TableCell>
 
                     <TableCell>

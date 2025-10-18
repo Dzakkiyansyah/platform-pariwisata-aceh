@@ -1,5 +1,3 @@
-// src/components/landing/CategoriesSection.tsx
-
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Landmark, Mountain, MoonStar, UtensilsCrossed } from "lucide-react";
@@ -11,11 +9,9 @@ const iconMap: { [key: string]: React.ElementType } = {
   'wisata-sejarah-budaya': Landmark,
   'wisata-alam': Mountain,
   'wisata-religi': MoonStar,
-  'wisata-kuliner': UtensilsCrossed, // Contoh jika Anda menambahkan kategori baru
-  // Tambahkan pemetaan lain jika perlu
+  'wisata-kuliner': UtensilsCrossed,
 };
 
-// Komponen ini sekarang menjadi async untuk mengambil data
 export default async function CategoriesSection() {
   const supabase = await createClient();
 
@@ -23,17 +19,17 @@ export default async function CategoriesSection() {
   const { data: categories, error } = await supabase
     .from('categories')
     .select('name, slug')
-    .limit(3); // Ambil 3 kategori teratas untuk ditampilkan di landing page
+    .limit(3);
 
   if (error) {
     console.error("Error fetching categories for landing page:", error);
-    return null; // Jangan tampilkan section jika gagal mengambil data
+    return null;
   }
 
   return (
     <section className="container mx-auto py-16">
       <div className="grid md:grid-cols-2 gap-12 items-center">
-        {/* Kolom Kiri: Teks Deskripsi (tidak berubah) */}
+        {/* Teks Deskripsi  */}
         <div className="space-y-4">
           <h2 className="text-4xl font-bold tracking-tight">
             Temukan Pengalaman
@@ -47,10 +43,9 @@ export default async function CategoriesSection() {
           </p>
         </div>
 
-        {/* Kolom Kanan: Kartu Kategori (sekarang dinamis) */}
+        {/*  Kartu Kategori */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {categories.map((category) => {
-              // Pilih ikon berdasarkan slug, gunakan Landmark sebagai default jika tidak ditemukan
               const IconComponent = iconMap[category.slug] || Landmark;
               
               return (

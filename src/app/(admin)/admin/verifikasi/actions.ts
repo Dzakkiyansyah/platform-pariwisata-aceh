@@ -1,56 +1,62 @@
-// src/app/(admin)/admin/verifikasi/actions.ts
 'use server'
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
-// Fungsi untuk membuat URL aman untuk melihat dokumen
 export async function getDocumentUrl(path: string) {
     const supabase = await createClient();
-    const { data, error } = await supabase.storage
-        .from('dokumen-verifikasi')
-        .createSignedUrl(path, 60);
-
+    const { data, error } = await supabase.storage.from('dokumen-verifikasi').createSignedUrl(path, 60);
     if (error) return { error: "Gagal mendapatkan URL dokumen." };
-    
     return { url: data.signedUrl };
-    // -------------------------
 }
 
-// approve pendaftar
 export async function approvePengelola(profileId: string) {
-    const supabase = await createClient();
-    
-    const { error: detailsError } = await supabase
+    const supabase = createAdminClient();
+
+    const { data: details, error: detailsError } = await supabase
         .from('pengelola_details')
-        .update({ status_verifikasi: 'approved' })
-        .eq('profile_id', profileId);
+        .select('nama_destinasi_diajukan, category_id')
+        .eq('profile_id', profileId)
+        .single();
 
-    if (detailsError) return { error: "Gagal menyetujui detail pengelola." };
+    if (detailsError || !details) {
+        return { error: "Gagal menemukan detail pendaftar." };
+    }
 
-    const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ role: 'pengelola' })
-        .eq('id', profileId);
+    await supabase.from('pengelola_details').update({ status_verifikasi: 'approved' }).eq('profile_id', profileId);
+    await supabase.from('profiles').update({ role: 'pengelola' }).eq('id', profileId);
 
-    if (profileError) return { error: "Gagal mengubah peran profil." };
+    // Ambil nama destinasi
+    const destinationName = details.nama_destinasi_diajukan;
+    const slug = destinationName.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    // Buat entri destinasi baru 
+    const { error: destinationError } = await supabase
+        .from('destinations')
+        .insert({
+            name: destinationName,
+            slug: slug,
+            category_id: details.category_id,
+            user_id: profileId,
+            status: 'draft',
+        });
 
-    revalidatePath('/admin/verifikasi');
-    return { message: "Pendaftar berhasil disetujui." };
-}
-
-// Reject pendaftar
-export async function rejectPengelola(profileId: string) {
-    const supabaseAdmin = createAdminClient();
-
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(profileId);
-
-    if (error) {
-        console.error("Delete user error:", error);
-        return { error: "Gagal menolak dan menghapus pendaftar." };
+    if (destinationError) {
+        console.error("Destination Insert Error:", destinationError);
+        // Jika gagal, kembalikan perubahan (rollback)
+        await supabase.from('profiles').update({ role: 'pengelola_pending' }).eq('id', profileId);
+        await supabase.from('pengelola_details').update({ status_verifikasi: 'pending' }).eq('profile_id', profileId);
+        return { error: "Gagal membuat entri destinasi baru. Cek log server." };
     }
     
+    revalidatePath('/admin/verifikasi');
+    return { message: "Pendaftar berhasil disetujui dan destinasi telah dibuat." };
+}
+
+export async function rejectPengelola(profileId: string) {
+    const supabaseAdmin = createAdminClient();
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(profileId);
+    if (error) return { error: "Gagal menolak dan menghapus pendaftar." };
     revalidatePath('/admin/verifikasi');
     return { message: "Pendaftar berhasil ditolak dan dihapus." };
 }

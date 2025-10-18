@@ -1,4 +1,3 @@
-// src/app/register/page.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Building } from "lucide-react";
 import Link from "next/link";
@@ -34,7 +33,7 @@ export default function RegisterPage() {
 
                         {/* Opsi 2: Daftar sebagai Pengelola */}
                         <Link href="/register/pengelola">
-                              <Card className="h-full hover:border-blue-500 hover:bg-slate-50 transition-all">
+                                <Card className="h-full hover:border-blue-500 hover:bg-slate-50 transition-all">
                                 <CardHeader>
                                     <div className="flex items-center gap-4">
                                         <Building className="h-8 w-8 text-blue-600"/>

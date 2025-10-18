@@ -1,4 +1,3 @@
-// src/components/landing/LatestNews.tsx
 import { createClient } from "@/lib/supabase/server";
 import NewsCard from "@/components/shared/NewsCard";
 import { Button } from "@/components/ui/button";

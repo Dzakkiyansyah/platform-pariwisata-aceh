@@ -1,18 +1,16 @@
-// src/app/(admin)/admin/destinasi/actions.ts
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-// Fungsi untuk update status destinasi
+// untuk update status destinasi
 export async function updateDestinationStatus(
   destinationId: number,
   newStatus: 'published' | 'archived' | 'draft'
 ) {
-  // ✅ Perbaikan: tambahkan 'await'
   const supabase = await createClient();
 
-  // Lakukan update data di tabel 'destinations'
+  // Perbarui status destinasi di database
   const { error } = await supabase
     .from('destinations')
     .update({ status: newStatus })
@@ -25,8 +23,6 @@ export async function updateDestinationStatus(
 
   // Refresh halaman admin
   revalidatePath('/admin/destinasi');
-
-  // Refresh halaman publik kalau statusnya 'published'
   if (newStatus === 'published') {
     revalidatePath('/destinasi');
     revalidatePath('/');

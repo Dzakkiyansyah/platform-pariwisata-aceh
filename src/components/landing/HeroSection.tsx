@@ -1,4 +1,3 @@
-// src/components/landing/HeroSection.tsx
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +11,7 @@ const HeroSection = () => {
   alt="Hero background"
   className="object-cover brightness-50"
   priority
+  sizes="100vw"
 />
 
 

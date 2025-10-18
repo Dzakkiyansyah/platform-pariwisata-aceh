@@ -1,4 +1,3 @@
-// src/components/auth/RegisterPengelolaForm.tsx
 'use client'
 
 import { useState, useEffect } from "react";
@@ -8,17 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import Link from "next/link";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Tipe untuk data kategori
-type Category = {
-    id: number;
-    name: string;
-};
+type Category = { id: number; name: string; };
 
 export default function RegisterPengelolaForm() {
-    // State untuk semua field
+    // ... (semua state tidak berubah)
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
@@ -28,12 +22,10 @@ export default function RegisterPengelolaForm() {
     const [categoryId, setCategoryId] = useState('');
     const [documentFile, setDocumentFile] = useState<File | null>(null);
     const [categories, setCategories] = useState<Category[]>([]);
-    
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const supabase = createClient();
 
-    // Mengambil data kategori dari database saat komponen dimuat
     useEffect(() => {
         const fetchCategories = async () => {
             const { data, error } = await supabase.from('categories').select('id, name');
@@ -56,16 +48,10 @@ export default function RegisterPengelolaForm() {
         }
         setIsLoading(true);
 
-        // 1. Daftarkan pengguna baru di Supabase Auth
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email,
             password,
-            options: {
-                data: {
-                    full_name: fullName,
-                    role: 'pengelola_pending' // Tandai sebagai pengelola yang menunggu verifikasi
-                }
-            }
+            options: { data: { full_name: fullName, role: 'pengelola_pending' } }
         });
 
         if (authError || !authData.user) {
@@ -76,8 +62,8 @@ export default function RegisterPengelolaForm() {
 
         const user = authData.user;
         const filePath = `${user.id}/${documentFile.name}`;
+        // --------------------------------
 
-        // 2. Upload dokumen ke Supabase Storage
         const { error: storageError } = await supabase.storage
             .from('dokumen-verifikasi')
             .upload(filePath, documentFile);
@@ -89,13 +75,12 @@ export default function RegisterPengelolaForm() {
             return;
         }
 
-        // 3. Simpan data usaha ke tabel pengelola_details
         const { error: detailsError } = await supabase.from('pengelola_details').insert({
             profile_id: user.id,
             nama_usaha: businessName,
             nama_destinasi_diajukan: destinationName,
             category_id: parseInt(categoryId),
-            dokumen_pendukung_path: filePath,
+            dokumen_pendukung_path: filePath, 
             status_verifikasi: 'pending',
         });
 
@@ -119,7 +104,6 @@ export default function RegisterPengelolaForm() {
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-8">
-                    {/* Data Diri */}
                     <fieldset className="space-y-4">
                         <legend className="font-semibold text-lg mb-2">Data Diri</legend>
                         <div className="grid gap-2"><label>Nama Lengkap</label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} required /></div>
@@ -127,8 +111,6 @@ export default function RegisterPengelolaForm() {
                         <div className="grid gap-2"><label>No. Handphone</label><Input value={phone} onChange={(e) => setPhone(e.target.value)} required /></div>
                         <div className="grid gap-2"><label>Password</label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
                     </fieldset>
-
-                    {/* Data Usaha */}
                     <fieldset className="space-y-4">
                         <legend className="font-semibold text-lg mb-2">Data Usaha</legend>
                         <div className="grid gap-2"><label>Nama Usaha/Lembaga</label><Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} required /></div>
@@ -143,10 +125,9 @@ export default function RegisterPengelolaForm() {
                         </div>
                         <div className="grid gap-2"><label>Dokumen Pendukung (PDF)</label><Input type="file" accept=".pdf" onChange={handleFileChange} required /></div>
                     </fieldset>
-
                     <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Memproses..." : "Daftar & Ajukan Verifikasi"}</Button>
                 </form>
             </CardContent>
         </Card>
-    )
+    );
 }

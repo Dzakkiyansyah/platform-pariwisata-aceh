@@ -1,5 +1,3 @@
-// src/components/shared/DestinationCard.tsx
-
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +38,7 @@ const DestinationCard = ({
           </div>
         </CardHeader>
 
-        {/* 2. Update CardContent untuk menampilkan semua info */}
+        {/* menampilkan semua info */}
         <CardContent className="p-4 flex flex-col flex-grow">
           {/* Kategori */}
           <p className="text-sm font-semibold text-blue-600">{category}</p>
@@ -53,7 +51,7 @@ const DestinationCard = ({
             <MapPin className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
             <span className="line-clamp-2">{address}</span>
           </div>
-          {/* Info Tambahan (Jam & Tiket) */}
+          {/* Info (Jam & Tiket) */}
           <div className="flex justify-between text-xs text-muted-foreground pt-3 mt-3 border-t">
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-1.5" />

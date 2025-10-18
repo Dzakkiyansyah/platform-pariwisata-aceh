@@ -1,5 +1,3 @@
-// src/components/shared/NewsCard.tsx
-
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,7 +32,6 @@ const NewsCard = ({
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
             />
-            {/* Overlay gradient agar gambar terlihat lebih dramatis */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
           </div>
         </CardHeader>

@@ -1,8 +1,5 @@
-// src/app/(admin)/admin/berita/tambah/page.tsx
 'use client';
 
-// --- PERBAIKAN DI SINI ---
-// Pastikan 'useActionState' diimpor dari 'react'
 import { useActionState, useEffect } from 'react';
 // -------------------------
 

@@ -1,16 +1,14 @@
-// src/app/(admin)/admin/dashboard/page.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Users, MapPin, Newspaper } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import RecentActivities from "@/components/admin/RecentActivities";
 
-// 1. Definisikan tipe yang sama di sini juga
 type ReviewWithProfile = {
     id: number;
     comment: string | null;
     profiles: {
-      full_name: string | null;
-      avatar_url: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
     } | null;
 };
 
@@ -44,7 +42,6 @@ export default async function DashboardPage() {
     const totalBerita = newsResult.count ?? 0;
     const ulasanBaru = recentReviewsResult.count ?? 0;
     
-    // 2. Terapkan tipe pada variabel dan berikan nilai default array kosong
     const recentActivities: ReviewWithProfile[] = recentActivitiesResult.data || [];
 
     return (
@@ -55,10 +52,8 @@ export default async function DashboardPage() {
                     Ringkasan data pariwisata Kota Banda Aceh secara real-time.
                 </p>
             </div>
-
-            {/* Bagian Kartu Statistik Utama (tidak berubah) */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {/* ... Isi Card Statistik ... */}
+                {/*  Card Statistik  */}
                 <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Destinasi</CardTitle><MapPin className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{totalDestinasi}</div></CardContent></Card>
                 <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Pengguna</CardTitle><Users className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{totalPengguna}</div></CardContent></Card>
                 <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Berita</CardTitle><Newspaper className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{totalBerita}</div></CardContent></Card>
@@ -74,7 +69,6 @@ export default async function DashboardPage() {
                 <Card className="lg:col-span-3">
                     <CardHeader><CardTitle>Aktivitas Terbaru</CardTitle></CardHeader>
                     <CardContent className="h-[300px] overflow-y-auto">
-                        {/* 3. Hapus 'as any' */}
                         <RecentActivities reviews={recentActivities} />
                     </CardContent>
                 </Card>

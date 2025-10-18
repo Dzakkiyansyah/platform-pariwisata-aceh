@@ -13,7 +13,7 @@ type UserProfile = {
 };
 
 export default async function ManajemenPenggunaPage() {
-    const supabase = createAdminClient(); // Client admin tidak async, jadi tidak perlu await
+    const supabase = createAdminClient(); 
 
     const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
     const { data: profiles, error: profilesError } = await supabase.from('profiles').select('*');

@@ -1,4 +1,3 @@
-// src/app/register/pengelola/menunggu-verifikasi/page.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MailCheck } from "lucide-react";
 

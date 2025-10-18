@@ -1,28 +1,24 @@
-// src/components/admin/AdminSidebar.tsx
 'use client'
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, List, Users, FileText, Newspaper } from "lucide-react";
-import LogoutButton from "./LogoutButton"; // Mengimpor tombol logout yang sudah kita buat
+import { LayoutDashboard, Edit, MessageSquare } from "lucide-react";
+import LogoutButton from "@/components/admin/LogoutButton";
 
 const navLinks = [
-    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/verifikasi", label: "Verifikasi Pendaftar", icon: FileText },
-    { href: "/admin/destinasi", label: "Manajemen Destinasi", icon: Newspaper },
-    { href: "/admin/kategori", label: "Manajemen Kategori", icon: List },
-    { href: "/admin/pengguna", label: "Manajemen Pengguna", icon: Users },
-    { href: "/admin/berita", label: "Manajemen Berita", icon: Newspaper },
+    { href: "/pengelola/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/pengelola/destinasi", label: "Kelola Destinasi", icon: Edit },
+    { href: "/pengelola/ulasan", label: "Manajemen Ulasan", icon: MessageSquare },
 ];
 
-export default function AdminSidebar() {
+export default function PengelolaSidebar({ namaUsaha }: { namaUsaha: string }) {
     const pathname = usePathname();
 
     return (
         <aside className="w-64 bg-white border-r flex flex-col">
             <div className="p-4 border-b">
-                <h2 className="text-xl font-bold text-blue-600">Dasbor Admin</h2>
-                <p className="text-sm text-muted-foreground">Dinas Pariwisata</p>
+                <h2 className="text-xl font-bold text-green-600">Dasbor Pengelola</h2>
+                <p className="text-sm text-muted-foreground truncate">{namaUsaha}</p>
             </div>
             
             <nav className="p-4 flex-1">
@@ -32,7 +28,7 @@ export default function AdminSidebar() {
                             <Link 
                                 href={link.href}
                                 className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all text-sm font-medium hover:bg-gray-100 ${
-                                    pathname.startsWith(link.href) ? 'bg-blue-100 text-blue-700' : 'text-gray-500'
+                                    pathname.startsWith(link.href) ? 'bg-green-100 text-green-700' : 'text-gray-500'
                                 }`}
                             >
                                 <link.icon className="h-4 w-4" />

@@ -1,10 +1,8 @@
-// src/app/(admin)/admin/verifikasi/page.tsx
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import VerificationActions from "@/components/admin/VerificationActions";
 
-// 1. Definisikan tipe (label) seperti sebelumnya. Ini sudah benar.
 type Pendaftar = {
     id: number;
     profile_id: string;
@@ -17,17 +15,13 @@ type Pendaftar = {
 
 export default async function VerifikasiPage() {
     const supabase = await createClient();
-
-    // 2. Lakukan panggilan RPC seperti biasa, TANPA <Pendaftar>
+    // Panggil RPC untuk mendapatkan pendaftar yang menunggu verifikasi
     const { data, error } = await supabase
         .rpc('get_pending_pengelola');
-
     if (error) {
         console.error("Error fetching pending users via RPC:", error);
     }
     
-    // 3. Setelah data didapat, kita beritahu TypeScript bentuknya.
-    // Ini akan menyelesaikan kedua error.
     const pendaftar: Pendaftar[] = data || [];
 
     return (
@@ -58,7 +52,6 @@ export default async function VerifikasiPage() {
                         </TableHeader>
                         <TableBody>
                             {pendaftar && pendaftar.length > 0 ? (
-                                // Sekarang TypeScript tahu bahwa 'item' adalah Pendaftar
                                 pendaftar.map((item) => (
                                     <TableRow key={item.id}>
                                         <TableCell>

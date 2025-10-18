@@ -1,16 +1,14 @@
-// src/components/landing/ReviewSlider.tsx
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import ReviewCard from '../shared/ReviewCard'
 import { Button } from '../ui/button'
 import { ArrowLeft, ArrowRight, Edit } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import LandingReviewForm from './LandingReviewForm'
 
-// Sesuaikan tipe data dengan apa yang dikembalikan oleh fungsi PostgreSQL
-type ReviewFromFunction = {
+// Tipe data yang diterima dari parent
+type ReviewWithProfile = {
     id: number;
     comment: string;
     rating: number;
@@ -19,39 +17,23 @@ type ReviewFromFunction = {
     avatar_url: string | null;
 }
 
-const ReviewSlider = () => {
-  const [reviews, setReviews] = useState<ReviewFromFunction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFormVisible, setIsFormVisible] = useState(false);
-  const supabase = createClient();
+// Komponen sekarang menerima 'initialReviews' sebagai prop
+export default function ReviewSlider({ initialReviews }: { initialReviews: ReviewWithProfile[] }) {
+  // Hapus semua logika fetch, useEffect, dan useState untuk reviews & isLoading
+  const [reviews, setReviews] = React.useState(initialReviews);
+  const [isFormVisible, setIsFormVisible] = React.useState(false);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: reviews.length > 2, align: 'start' });
 
-  // Ubah fungsi fetch untuk memanggil RPC
-  const fetchReviews = useCallback(async () => {
-    setIsLoading(true);
-    // Panggil fungsi 'get_reviews_with_profiles' dengan parameter limit 5
-    const { data, error } = await supabase
-      .rpc('get_reviews_with_profiles', { review_limit: 5 });
-
-    if (error) {
-      console.error('Error fetching reviews via RPC:', error);
-    } else {
-      setReviews(data || []);
-    }
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+  // Fungsi untuk me-refresh data (akan kita butuhkan lagi nanti)
+  const handleReviewSubmit = () => {
+    // Untuk sekarang, kita hanya menutup form. Refresh otomatis akan ditangani oleh Server Actions.
+    setIsFormVisible(false);
+    // Kita akan menambahkan revalidasi di action form nanti
+  }
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
-  if (isLoading) {
-    return <section className="bg-slate-50 py-16"><div className="container text-center">Memuat ulasan...</div></section>;
-  }
 
   return (
     <section className="bg-slate-50 py-16">
@@ -76,7 +58,7 @@ const ReviewSlider = () => {
 
             {isFormVisible ? (
                 <LandingReviewForm 
-                    onReviewSubmit={fetchReviews} 
+                    onReviewSubmit={handleReviewSubmit} 
                     onClose={() => setIsFormVisible(false)}
                 />
             ) : (
@@ -88,8 +70,7 @@ const ReviewSlider = () => {
                                     <div key={review.id} className="flex-grow-0 flex-shrink-0 w-full md:w-1/3">
                                         <ReviewCard 
                                             rating={review.rating} 
-                                            text={review.comment}
-                                            // Gunakan data dari fungsi
+                                            text={review.comment!}
                                             author={review.full_name || review.anonymous_name || 'Wisatawan'}
                                             avatarUrl={review.avatar_url}
                                         />
@@ -108,5 +89,3 @@ const ReviewSlider = () => {
     </section>
   )
 }
-
-export default ReviewSlider;

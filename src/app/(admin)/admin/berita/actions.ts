@@ -18,13 +18,10 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
 
     const slug = title.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/[^\w-]+/g, '');
     const fileName = `${Date.now()}-${imageFile.name}`;
-    
-    // --- INI PERBAIKAN UTAMANYA ---
-    // Pastikan filePath HANYA berisi nama file, TANPA embel-embel folder apapun.
     const filePath = fileName;
     // ----------------------------
 
-    // 1. Upload gambar ke root bucket
+    // unggah gambar ke bucket
     const { error: uploadError } = await supabase.storage
         .from('gambar-berita')
         .upload(filePath, imageFile);
@@ -34,7 +31,6 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
         return { error: 'Gagal mengunggah gambar.' };
     }
 
-    // 2. Dapatkan URL publik dari root bucket
     const { data } = supabase.storage
         .from('gambar-berita')
         .getPublicUrl(filePath);
@@ -45,7 +41,6 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
         return { error: 'Gagal mendapatkan URL publik gambar.' };
     }
 
-    // 3. Simpan URL yang sudah benar ke database
     const { error: insertError } = await supabase.from('news').insert({
         title,
         slug,
@@ -64,7 +59,6 @@ export async function addNews(prevState: ActionState, formData: FormData): Promi
     redirect('/admin/berita');
 }
 
-// ... (fungsi deleteNews tidak perlu diubah, tapi pastikan juga path-nya benar)
 export async function deleteNews(newsId: number, imagePath: string) {
     const supabase = await createClient();
     const { error: deleteError } = await supabase.from('news').delete().eq('id', newsId);

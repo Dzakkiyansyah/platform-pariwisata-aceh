@@ -1,4 +1,3 @@
-// src/components/landing/LandingReviewForm.tsx
 'use client'
 
 import { useState, useEffect } from "react";
@@ -58,7 +57,7 @@ export default function LandingReviewForm({ onReviewSubmit, onClose }: FormProps
         } else {
             toast.success("Terima kasih atas ulasan Anda!");
             onReviewSubmit(); // Panggil refresh data
-            onClose(); // <-- Panggil fungsi untuk menutup form
+            onClose();
         }
         setIsSubmitting(false);
     };
@@ -73,7 +72,7 @@ export default function LandingReviewForm({ onReviewSubmit, onClose }: FormProps
             <h3 className="text-2xl font-semibold text-center">Bagikan Pengalaman Anda!</h3>
             {/* ... (sisa form tidak berubah) ... */}
             {!user && (
-                 <div className="grid gap-2">
+                <div className="grid gap-2">
                     <label htmlFor="name">Nama Anda</label>
                     <Input id="name" placeholder="Masukkan nama Anda" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>

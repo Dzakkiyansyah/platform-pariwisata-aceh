@@ -1,4 +1,3 @@
-// src/components/landing/PopularDestinations.tsx
 import { createClient } from "@/lib/supabase/server";
 import DestinationCard from "@/components/shared/DestinationCard";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ export default async function PopularDestinations() {
 
   if (error) {
     console.error("Error fetching popular destinations:", error.message);
-    return null; // Jangan tampilkan section jika ada error
+    return null;
   }
 
   return (

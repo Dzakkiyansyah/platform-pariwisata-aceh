@@ -1,4 +1,3 @@
-// src/components/admin/LogoutButton.tsx
 'use client'
 
 import { logout } from "@/components/auth/actions";

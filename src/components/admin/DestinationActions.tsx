@@ -1,4 +1,3 @@
-// src/components/admin/DestinationActions.tsx
 'use client'
 
 import { Button } from "@/components/ui/button";
@@ -46,7 +45,6 @@ export default function DestinationActions({ destination }: { destination: Desti
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {/* Tampilkan aksi berdasarkan status saat ini */}
                 {destination.status !== 'published' && (
                     <DropdownMenuItem 
                         disabled={isPending}

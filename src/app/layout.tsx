@@ -19,8 +19,6 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        {/* Root layout ini sekarang hanya berisi body dan children */}
-        {/* Layout spesifik (publik atau admin) akan dimasukkan di sini */}
         {children}
         <Toaster richColors />
       </body>
