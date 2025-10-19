@@ -20,7 +20,6 @@ type Destination = {
 export default async function DestinasiPage({ searchParams }: DestinasiPageProps) {
   const supabase = await createClient();
   
-  // Ambil nilai dari searchParams dengan aman
   const searchTerm = typeof searchParams.q === 'string' ? searchParams.q : "";
   const selectedCategoryName = typeof searchParams.category === 'string' ? searchParams.category : "Semua Kategori";
 
@@ -31,9 +30,9 @@ export default async function DestinasiPage({ searchParams }: DestinasiPageProps
 
   if (categoriesError) console.error("Error fetching categories:", categoriesError);
 
-  let query = supabase.from("destinations").select(`*, categories (name)`);
+  let query = supabase.from("destinations").select(`*, categories (name)`).eq('status', 'published');
 
-  if (searchTerm) query = query.ilike("name", `%${searchTerm}%`);
+  if (searchTerm) query = query.ilike("name", `%searchTerm}%`);
   if (selectedCategoryName !== "Semua Kategori") query = query.eq("categories.name", selectedCategoryName);
 
   const { data, error: destinationsError } = await query;

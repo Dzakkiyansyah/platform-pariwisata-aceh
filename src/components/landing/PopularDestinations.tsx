@@ -1,20 +1,30 @@
 import { createClient } from "@/lib/supabase/server";
-import DestinationCard from "@/components/shared/DestinationCard";
-import { Button } from "@/components/ui/button";
+import DestinationCard from "../shared/DestinationCard";
+import { Button } from "../ui/button";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
+type Destination = {
+  id: number;
+  slug: string;
+  image_url: string | null;
+  name: string;
+  address: string;
+  open_time: string;
+  ticket_price: string;
+  categories: { name: string } | null;
+};
 
 export default async function PopularDestinations() {
   const supabase = await createClient();
-
   const { data: popularDestinations, error } = await supabase
     .from("destinations")
     .select("*, categories(name)")
-    .order("created_at", { ascending: false })
+    .eq("status", "published")
     .limit(6);
 
   if (error) {
-    console.error("Error fetching popular destinations:", error.message);
-    return null;
+    console.error("Error fetching popular destinations:", error);
   }
 
   return (
@@ -22,22 +32,25 @@ export default async function PopularDestinations() {
       <div className="container mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold tracking-tight">
-            Destinasi Terpopuler Pilihan Wisatawan
+            Destinasi Paling Populer
           </h2>
           <p className="text-muted-foreground mt-2">
-            Tempat-tempat yang paling direkomendasikan.
+            Tempat-tempat yang paling sering dikunjungi dan disukai oleh para
+            wisatawan.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {popularDestinations?.map((dest: any) => (
+          {popularDestinations?.map((dest: Destination) => (
             <DestinationCard
               key={dest.id}
               slug={dest.slug}
-              imageUrl={dest.image_url}
+              // --- PERBAIKAN DI SINI ---
+              // Jika dest.image_url kosong, gunakan placeholder
+              imageUrl={dest.image_url || "/images/placeholder.jpg"}
               name={dest.name}
               address={dest.address}
-              category={dest.categories.name}
+              category={dest.categories?.name || "Tanpa Kategori"}
               openTime={dest.open_time}
               ticketPrice={dest.ticket_price}
             />
@@ -45,8 +58,10 @@ export default async function PopularDestinations() {
         </div>
 
         <div className="text-center mt-12">
-          <Button asChild variant="outline" size="lg">
-            <Link href="/destinasi">Lihat Semua Destinasi</Link>
+          <Button asChild>
+            <Link href="/destinasi">
+              Lihat Semua Destinasi <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </div>
