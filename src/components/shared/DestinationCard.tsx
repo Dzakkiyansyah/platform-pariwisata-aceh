@@ -1,9 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Clock, Ticket } from "lucide-react"; // Pastikan Clock dan Ticket di-impor
+import { MapPin, Clock, Ticket } from "lucide-react";
 
-// 1. Update interface untuk menerima props baru
 interface DestinationCardProps {
   slug: string;
   imageUrl: string;
@@ -26,32 +25,29 @@ const DestinationCard = ({
   return (
     <Link href={`/destinasi/${slug}`} className="group">
       <Card className="w-full h-full flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-        {/* Bagian Gambar */}
+        {/* Gambar */}
         <CardHeader className="p-0">
           <div className="relative h-52 w-full">
             <Image
               src={imageUrl}
               alt={name}
               fill
-              className="group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>
         </CardHeader>
 
-        {/* menampilkan semua info */}
+        {/* Info */}
         <CardContent className="p-4 flex flex-col flex-grow">
-          {/* Kategori */}
           <p className="text-sm font-semibold text-blue-600">{category}</p>
-          {/* Judul */}
           <CardTitle className="text-lg leading-tight mt-1 group-hover:text-blue-700 transition-colors">
             {name}
           </CardTitle>
-          {/* Alamat */}
           <div className="flex items-start text-sm text-muted-foreground mt-2 flex-grow">
             <MapPin className="w-4 h-4 mr-2 mt-1 flex-shrink-0" />
             <span className="line-clamp-2">{address}</span>
           </div>
-          {/* Info (Jam & Tiket) */}
           <div className="flex justify-between text-xs text-muted-foreground pt-3 mt-3 border-t">
             <div className="flex items-center">
               <Clock className="w-4 h-4 mr-1.5" />
