@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server"; // <-- Impor Supabase Server Client
-import { UserNav } from "@/components/shared/UserNav"; // <-- Impor komponen menu profil
+import { createClient } from "@/lib/supabase/server";
+import { UserNav } from "@/components/shared/UserNav"; 
 
 const navLinks = [
   { href: "/", label: "Beranda" },
@@ -11,7 +11,7 @@ const navLinks = [
   
 ];
 
-// Navbar sekarang menjadi 'async function' untuk mengambil data di server
+
 export default async function Navbar() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -30,7 +30,7 @@ export default async function Navbar() {
   return (
     <header className="py-4 bg-[#1C2C4A] backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Bagian Kiri: Logo */}
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <span className="font-bold text-xl text-white">Jelajah Aceh</span>
         </Link>
@@ -48,13 +48,12 @@ export default async function Navbar() {
           ))}
         </nav>
 
-        {/* Bagian Kanan (Sekarang Dinamis) */}
         <div className="flex items-center gap-4">
           {user && userProfile ? (
             // Jika user login, tampilkan menu profil
             <UserNav user={userProfile} />
           ) : (
-            // Jika tidak login, tampilkan tombol dari desain Anda
+            // Jika tidak login, tampilkan tombol Login dan Daftar
             <>
               <Button asChild variant="ghost" className="h-10 px-4 text-sm text-gray-300 hover:text-white hover:bg-white/10">
                 <Link href="/login">Login</Link>

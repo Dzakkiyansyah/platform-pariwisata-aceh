@@ -15,14 +15,17 @@ type Destination = {
   open_time: string;
   ticket_price: string;
   categories: { name: string } | null;
+  destination_photos?: { photo_path: string }[]; // Tambahan relasi foto
 };
 
 export default async function DestinasiPage({ searchParams }: DestinasiPageProps) {
   const supabase = await createClient();
-  
-  const searchTerm = typeof searchParams.q === 'string' ? searchParams.q : "";
-  const selectedCategoryName = typeof searchParams.category === 'string' ? searchParams.category : "Semua Kategori";
 
+  const searchTerm = typeof searchParams.q === "string" ? searchParams.q : "";
+  const selectedCategoryName =
+    typeof searchParams.category === "string" ? searchParams.category : "Semua Kategori";
+
+  // Ambil daftar kategori
   const { data: categories, error: categoriesError } = await supabase
     .from("categories")
     .select("name")
@@ -30,10 +33,28 @@ export default async function DestinasiPage({ searchParams }: DestinasiPageProps
 
   if (categoriesError) console.error("Error fetching categories:", categoriesError);
 
-  let query = supabase.from("destinations").select(`*, categories (name)`).eq('status', 'published');
+  // Ambil data destinasi + relasi kategori + foto
+  let query = supabase.from("destinations").select(`
+    id,
+    slug,
+    image_url,
+    name,
+    address,
+    open_time,
+    ticket_price,
+    categories(name),
+    destination_photos(photo_path)
+  `);
 
-  if (searchTerm) query = query.ilike("name", `%searchTerm}%`);
-  if (selectedCategoryName !== "Semua Kategori") query = query.eq("categories.name", selectedCategoryName);
+  // Filter berdasarkan pencarian
+  if (searchTerm) {
+    query = query.ilike("name", `%${searchTerm}%`);
+  }
+
+  // Filter berdasarkan kategori
+  if (selectedCategoryName !== "Semua Kategori") {
+    query = query.eq("categories.name", selectedCategoryName);
+  }
 
   const { data, error: destinationsError } = await query;
 
@@ -47,6 +68,7 @@ export default async function DestinasiPage({ searchParams }: DestinasiPageProps
   return (
     <main className="bg-slate-50">
       <div className="container mx-auto py-16">
+        {/* Header */}
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold tracking-tight">Jelajahi Semua Destinasi</h1>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
@@ -54,22 +76,31 @@ export default async function DestinasiPage({ searchParams }: DestinasiPageProps
           </p>
         </div>
 
+        {/* Filter */}
         <FilterControls categories={categories?.map((c) => c.name) || []} />
 
+        {/* Grid */}
         {destinations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {destinations.map((dest) => (
-              <DestinationCard
-                key={dest.id}
-                slug={dest.slug}
-                imageUrl={dest.image_url || "/images/placeholder.jpg"}
-                name={dest.name}
-                address={dest.address}
-                category={dest.categories?.name || "Tanpa Kategori"}
-                openTime={dest.open_time}
-                ticketPrice={dest.ticket_price}
-              />
-            ))}
+            {destinations.map((dest) => {
+              const imageUrl =
+                dest.image_url ||
+                dest.destination_photos?.[0]?.photo_path ||
+                "/images/placeholder.jpg";
+
+              return (
+                <DestinationCard
+                  key={dest.id}
+                  slug={dest.slug}
+                  imageUrl={imageUrl}
+                  name={dest.name}
+                  address={dest.address}
+                  category={dest.categories?.name || "Tanpa Kategori"}
+                  openTime={dest.open_time}
+                  ticketPrice={dest.ticket_price}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="text-center col-span-full py-16">

@@ -20,7 +20,7 @@ export default function BookmarkButton({ destinationId, isBookmarked: initialIsB
 
     const handleClick = () => {
         if (!isLoggedIn) {
-            router.push('/login'); // Arahkan ke login jika belum masuk
+            router.push('/login'); 
             return;
         }
 
@@ -29,7 +29,7 @@ export default function BookmarkButton({ destinationId, isBookmarked: initialIsB
             if (result.error) {
                 toast.error(result.error);
             } else {
-                setIsBookmarked(!isBookmarked); // Update state tombol secara lokal
+                setIsBookmarked(!isBookmarked); 
                 toast.success(result.message);
             }
         });

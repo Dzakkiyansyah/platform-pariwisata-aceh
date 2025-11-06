@@ -30,7 +30,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // --- PERBAIKAN DI SINI ---
   try {
     // Fungsi ini akan mencoba me-refresh sesi jika ada.
     // Jika tidak ada sesi (pengguna tidak login), ia akan melempar error yang kita tangkap.

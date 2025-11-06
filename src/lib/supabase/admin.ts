@@ -1,4 +1,3 @@
-// src/lib/supabase/admin.ts
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
@@ -7,10 +6,9 @@ import { cookies } from 'next/headers';
 export const createAdminClient = () => {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!, // <-- Gunakan service_role key
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, 
     {
       auth: {
-        // Penting untuk admin client di server
         autoRefreshToken: false,
         persistSession: false,
       },

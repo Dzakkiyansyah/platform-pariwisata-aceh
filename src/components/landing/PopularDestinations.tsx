@@ -47,7 +47,6 @@ export default async function PopularDestinations() {
         {/* Kartu destinasi */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {destinations.map((dest) => {
-            // Ambil image utama dari tabel utama, kalau kosong ambil dari foto pertama
             const imageUrl =
               dest.image_url ||
               dest.destination_photos?.[0]?.photo_path ||

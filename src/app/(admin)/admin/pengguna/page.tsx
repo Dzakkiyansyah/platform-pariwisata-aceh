@@ -39,7 +39,7 @@ export default async function ManajemenPenggunaPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Manajemen Pengguna</h1>
+                <h1 className="text-3xl font-bold">Management Pengguna</h1>
                 <p className="text-muted-foreground mt-1">
                     Lihat dan kelola semua akun yang terdaftar di platform.
                 </p>

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from '@/components/ui/button'
 import {
   LineChart,
   Line,
@@ -13,56 +13,79 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
-import { createClient } from '@/lib/supabase/client';
+} from 'recharts'
+import { createClient } from '@/lib/supabase/client'
+import { Download } from 'lucide-react'
+import { CSVLink } from 'react-csv'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type ChartData = {
-  name: string;
-  pengunjung: number;
-};
+  name: string
+  value: number
+}
 
-type TimeRange = 'weekly' | 'monthly' | 'yearly';
+type TimeRange = 'weekly' | 'monthly' | 'yearly'
+type MetricType = 'reviews' | 'views'
 
 export default function AnalyticsChart() {
-  const [timeRange, setTimeRange] = useState<TimeRange>('monthly');
-  const [data, setData] = useState<ChartData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const [timeRange, setTimeRange] = useState<TimeRange>('monthly')
+  const [metric, setMetric] = useState<MetricType>('reviews')
+  const [data, setData] = useState<ChartData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const csvLinkRef = useRef<any>(null)
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
-      const now = new Date();
-      let startDate: Date;
+      setIsLoading(true)
+      const now = new Date()
+      let startDate: Date
 
-      if (timeRange === 'weekly') startDate = new Date(now.setDate(now.getDate() - 7));
-      else if (timeRange === 'monthly') startDate = new Date(now.setMonth(now.getMonth() - 1));
-      else startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+      if (timeRange === 'weekly') startDate = new Date(now.setDate(now.getDate() - 7))
+      else if (timeRange === 'monthly') startDate = new Date(now.setMonth(now.getMonth() - 1))
+      else startDate = new Date(now.setFullYear(now.getFullYear() - 1))
 
-      const { data: rawData, error } = await supabase
-        .rpc('get_destination_popularity', { start_date: startDate.toISOString() });
+      const rpcName = metric === 'reviews'
+        ? 'get_destination_popularity'
+        : 'get_destination_views'
+
+      const valueKey = metric === 'reviews'
+        ? 'review_count'
+        : 'view_count'
+
+      const { data: rawData, error } = await supabase.rpc(rpcName, {
+        start_date: startDate.toISOString(),
+      })
 
       if (error) {
-        console.error("Error fetching analytics data:", error);
-        setData([]);
+        console.error(`Error fetching ${metric} data:`, error)
+        setData([])
       } else {
-        const formattedData = rawData.map((item: any) => ({
+        const formatted = rawData?.map((item: any) => ({
           name: item.destination_name,
-          pengunjung: item.review_count,
-        }));
-        setData(formattedData);
+          value: item[valueKey],
+        })) ?? []
+        setData(formatted)
       }
-      setIsLoading(false);
-    };
 
-    fetchData();
-  }, [timeRange, supabase]);
+      setIsLoading(false)
+    }
+
+    fetchData()
+  }, [timeRange, metric, supabase])
 
   const title = useMemo(() => {
-    if (timeRange === 'weekly') return 'Popularitas Destinasi (7 Hari Terakhir)';
-    if (timeRange === 'monthly') return 'Popularitas Destinasi (30 Hari Terakhir)';
-    return 'Popularitas Destinasi (1 Tahun Terakhir)';
-  }, [timeRange]);
+    const prefix = metric === 'reviews' ? 'Popularitas (Ulasan)' : 'Kunjungan Halaman'
+    if (timeRange === 'weekly') return `${prefix} - 7 Hari Terakhir`
+    if (timeRange === 'monthly') return `${prefix} - 30 Hari Terakhir`
+    return `${prefix} - 1 Tahun Terakhir`
+  }, [timeRange, metric])
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -75,36 +98,77 @@ export default function AnalyticsChart() {
           <p className="font-medium text-sm mb-1">{label}</p>
           <div className="flex items-center gap-2 text-xs">
             <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-            <span>Pengunjung: <strong>{payload[0].value}</strong></span>
+            <span>{metric === 'reviews' ? 'Ulasan' : 'Kunjungan'}: <strong>{payload[0].value}</strong></span>
           </div>
         </motion.div>
-      );
+      )
     }
-    return null;
-  };
+    return null
+  }
 
-  const rangeButton = (range: TimeRange, label: string) => (
-    <Button
-      variant={timeRange === range ? 'default' : 'outline'}
-      size="sm"
-      onClick={() => setTimeRange(range)}
-      className={`transition-all duration-200 ${timeRange === range ? 'shadow-sm scale-105' : 'opacity-80 hover:opacity-100'}`}
-    >
-      {label}
-    </Button>
-  );
+  const handleExportCSV = () => {
+    if (csvLinkRef.current) csvLinkRef.current.link.click()
+  }
+
+  const csvFileName = useMemo(
+    () => `laporan_${metric}_${timeRange}_${new Date().toISOString().split('T')[0]}.csv`,
+    [timeRange, metric]
+  )
 
   return (
     <Card className="lg:col-span-4 overflow-hidden border border-border/50 backdrop-blur-sm bg-gradient-to-b from-background to-muted/20">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0 pb-4">
         <div>
           <CardTitle className="text-lg font-semibold tracking-tight">{title}</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">Berdasarkan jumlah ulasan yang diterima.</CardDescription>
+          <CardDescription className="text-sm text-muted-foreground">
+            {metric === 'reviews'
+              ? 'Berdasarkan jumlah ulasan yang diterima.'
+              : 'Berdasarkan jumlah kunjungan halaman detail.'}
+          </CardDescription>
         </div>
-        <div className="flex gap-2">
-          {rangeButton('weekly', 'Mingguan')}
-          {rangeButton('monthly', 'Bulanan')}
-          {rangeButton('yearly', 'Tahunan')}
+
+        <div className="flex flex-wrap justify-end gap-2 items-center">
+          <Select value={metric} onValueChange={(v: MetricType) => setMetric(v)}>
+            <SelectTrigger className="w-[180px] h-9">
+              <SelectValue placeholder="Pilih Metrik" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="reviews">Popularitas (Ulasan)</SelectItem>
+              <SelectItem value="views">Kunjungan Halaman</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {(['weekly', 'monthly', 'yearly'] as TimeRange[]).map((range) => (
+            <Button
+              key={range}
+              variant={timeRange === range ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setTimeRange(range)}
+            >
+              {range === 'weekly' ? 'Mingguan' : range === 'monthly' ? 'Bulanan' : 'Tahunan'}
+            </Button>
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={isLoading || data.length === 0}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Ekspor CSV
+          </Button>
+          <CSVLink
+            data={data}
+            headers={[
+              { label: "Nama Destinasi", key: "name" },
+              { label: metric === 'reviews' ? "Jumlah Ulasan" : "Jumlah Kunjungan", key: "value" },
+            ]}
+            filename={csvFileName}
+            className="hidden"
+            ref={csvLinkRef}
+            target="_blank"
+          />
         </div>
       </CardHeader>
 
@@ -128,20 +192,13 @@ export default function AnalyticsChart() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  angle={-35}
-                  textAnchor="end"
-                  interval={0}
-                  height={55}
-                />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} angle={-35} textAnchor="end" interval={0} height={55} />
                 <YAxis tick={{ fontSize: 12 }} domain={[0, 'auto']} />
                 <RechartsTooltip content={<CustomTooltip />} />
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey="pengunjung"
+                  dataKey="value"
                   stroke="url(#colorLine)"
                   strokeWidth={3}
                   dot={{
@@ -161,11 +218,11 @@ export default function AnalyticsChart() {
             </ResponsiveContainer>
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">
-              Tidak ada data ulasan pada periode ini.
+              Tidak ada data pada periode ini.
             </div>
           )}
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

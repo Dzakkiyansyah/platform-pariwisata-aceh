@@ -34,7 +34,7 @@ export default async function BeritaPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold">Manajemen Berita</h1>
+                    <h1 className="text-3xl font-bold">Management Berita</h1>
                     <p className="text-muted-foreground mt-1">
                         Buat dan kelola semua berita dan acara untuk ditampilkan di halaman publik.
                     </p>

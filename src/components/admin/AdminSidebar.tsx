@@ -1,18 +1,17 @@
-// src/components/admin/AdminSidebar.tsx
 'use client'
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, List, Users, FileText, Newspaper } from "lucide-react";
-import LogoutButton from "./LogoutButton"; // Mengimpor tombol logout yang sudah kita buat
+import LogoutButton from "./LogoutButton"; 
 
 const navLinks = [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/verifikasi", label: "Verifikasi Pendaftar", icon: FileText },
-    { href: "/admin/destinasi", label: "Manajemen Destinasi", icon: Newspaper },
-    { href: "/admin/kategori", label: "Manajemen Kategori", icon: List },
-    { href: "/admin/pengguna", label: "Manajemen Pengguna", icon: Users },
-    { href: "/admin/berita", label: "Manajemen Berita", icon: Newspaper },
+    { href: "/admin/destinasi", label: "Management Destinasi", icon: Newspaper },
+    { href: "/admin/kategori", label: "Management Kategori", icon: List },
+    { href: "/admin/pengguna", label: "Management Pengguna", icon: Users },
+    { href: "/admin/berita", label: "Management Berita", icon: Newspaper },
 ];
 
 export default function AdminSidebar() {

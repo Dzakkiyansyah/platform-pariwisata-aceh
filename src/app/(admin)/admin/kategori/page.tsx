@@ -27,7 +27,7 @@ export default async function KategoriPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Manajemen Kategori</h1>
+                <h1 className="text-3xl font-bold">Management Kategori</h1>
                 <p className="text-muted-foreground mt-1">
                     Tambah, lihat, atau hapus kategori wisata yang tersedia di platform.
                 </p>

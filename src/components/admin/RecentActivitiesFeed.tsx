@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Star, UserPlus, FileText, Newspaper } from "lucide-react";
 import React from "react";
 
-// Tipe untuk data aktivitas dari fungsi PostgreSQL
 type Activity = {
   type: "review" | "new_user" | "new_manager" | "news";
   description: string;
@@ -12,7 +11,6 @@ type Activity = {
   created_at: string;
 };
 
-// Peta ikon berdasarkan jenis aktivitas
 const ICON_MAP: Record<Activity["type"], React.ElementType> = {
   review: Star,
   new_user: UserPlus,
@@ -23,7 +21,6 @@ const ICON_MAP: Record<Activity["type"], React.ElementType> = {
 export default async function RecentActivitiesFeed() {
   const supabase = createAdminClient();
 
-  // Ambil data aktivitas dari fungsi RPC di Supabase
   const { data: activities, error } = await supabase.rpc("get_recent_activities");
 
   if (error) {
@@ -33,9 +30,16 @@ export default async function RecentActivitiesFeed() {
 
   if (!activities || activities.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-10">
-        Belum ada aktivitas terbaru.
-      </p>
+      <Card className="lg:col-span-3">
+        <CardHeader>
+          <CardTitle>Aktivitas Terbaru</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground text-center">
+            Belum ada aktivitas terbaru.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -44,20 +48,17 @@ export default async function RecentActivitiesFeed() {
       <CardHeader>
         <CardTitle>Aktivitas Terbaru</CardTitle>
       </CardHeader>
-
       <CardContent>
-        <div className="space-y-4">
+        {/* Container scrollable dengan tinggi tetap */}
+        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
           {activities.map((activity: Activity, index: number) => {
             const Icon = ICON_MAP[activity.type] ?? FileText;
 
             return (
               <div key={index} className="flex items-start gap-4">
-                {/* Ikon */}
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
                   <Icon className="h-5 w-5 text-muted-foreground" />
                 </div>
-
-                {/* Detail aktivitas */}
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">
                     <span className="font-semibold text-primary">

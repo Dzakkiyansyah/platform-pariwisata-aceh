@@ -1,10 +1,7 @@
-// src/components/reviews/ReviewList.tsx
-
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 
-// Tipe data yang sesuai dengan hasil dari fungsi PostgreSQL
 type ReviewFromFunction = {
   id: number;
   comment: string | null;
@@ -29,9 +26,6 @@ type ReviewListProps = {
 
 export default async function ReviewList({ destinationId }: ReviewListProps) {
   const supabase = await createClient();
-
-  // --- PERUBAHAN DI SINI ---
-  // Panggil fungsi database 'get_reviews_for_destination' melalui RPC
   const { data, error } = await supabase
     .rpc('get_reviews_for_destination', { dest_id: destinationId });
   // -------------------------
