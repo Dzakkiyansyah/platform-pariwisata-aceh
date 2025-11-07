@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { unstable_noStore as noStore } from "next/cache"; // ✅ Tambahkan ini
+import { unstable_noStore as noStore } from "next/cache";
 import {
   Clock,
   Globe,
@@ -21,10 +21,16 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import BookmarkButton from "@/components/shared/BookmarkButton";
 
+// ==============================
+// 🧩 Props Type
+// ==============================
 type DestinasiDetailPageProps = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
+// ==============================
+// ⭐ Komponen Rating
+// ==============================
 const StarRating = ({
   rating,
   reviewCount,
@@ -52,18 +58,24 @@ const StarRating = ({
   </div>
 );
 
+// ==============================
+// 🏷️ Icon Fasilitas
+// ==============================
 const iconMap: { [key: string]: React.ElementType } = {
   "Area Parkir": ParkingCircle,
   "Warung Makan": UtensilsCrossed,
   Keamanan: ShieldCheck,
 };
 
+// ==============================
+// 🏝️ Halaman Detail Destinasi
+// ==============================
 export default async function DestinasiDetailPage({
   params,
 }: DestinasiDetailPageProps) {
-  noStore(); // ✅ Halaman selalu di-render ulang agar view tercatat
+  noStore(); // Selalu render ulang agar view tercatat
 
-  const { slug } = params;
+  const { slug } = await params; // ✅ FIX: wajib pakai 'await'
   const supabase = await createClient();
   const {
     data: { user },
@@ -82,17 +94,17 @@ export default async function DestinasiDetailPage({
     notFound();
   }
 
-  // ✅ Tambahkan logika pencatatan kunjungan
+  // Catat kunjungan user
   try {
     await supabase.from("destination_views").insert({
       destination_id: destination.id,
-      user_id: user?.id || null, // kalau user login, simpan ID-nya juga
+      user_id: user?.id || null,
     });
   } catch (viewError) {
     console.error("Error logging destination view:", viewError);
-    // tidak perlu throw error, biar halaman tetap jalan
   }
 
+  // Cek apakah sudah di-bookmark
   let isBookmarked = false;
   if (user) {
     const { data: bookmark } = await supabase
@@ -104,6 +116,7 @@ export default async function DestinasiDetailPage({
     if (bookmark) isBookmarked = true;
   }
 
+  // Ambil rata-rata rating
   const { data: avgRatingData } = await supabase.rpc("get_average_rating", {
     dest_id: destination.id,
   });
@@ -111,9 +124,7 @@ export default async function DestinasiDetailPage({
   const imageUrls = (destination.destination_photos || []).map(
     (photo) => photo.photo_path
   );
-  if (destination.image_url) {
-    imageUrls.unshift(destination.image_url);
-  }
+  if (destination.image_url) imageUrls.unshift(destination.image_url);
 
   const reviewCount = destination.reviews[0]?.count ?? 0;
   const rating = avgRatingData ? parseFloat(avgRatingData.toFixed(1)) : 0.0;
@@ -122,10 +133,12 @@ export default async function DestinasiDetailPage({
   return (
     <main>
       <ImageSlider images={imageUrls} />
+
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-32 md:-mt-48">
         <div className="relative bg-white p-6 sm:p-8 rounded-xl shadow-lg">
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
             <div className="md:col-span-2 space-y-8">
+              {/* Informasi Umum */}
               <section>
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
                   {destination.name}
@@ -137,6 +150,7 @@ export default async function DestinasiDetailPage({
                 <div className="mt-4">
                   <StarRating rating={rating} reviewCount={reviewCount} />
                 </div>
+
                 <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-sm border-t pt-4">
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-2" />
@@ -160,6 +174,7 @@ export default async function DestinasiDetailPage({
                 </div>
               </section>
 
+              {/* Tentang Destinasi */}
               <section>
                 <h2 className="text-2xl font-semibold mb-3">
                   Tentang Destinasi
@@ -169,11 +184,12 @@ export default async function DestinasiDetailPage({
                 </div>
               </section>
 
+              {/* Fasilitas */}
               <section>
                 <h2 className="text-2xl font-semibold mb-3">Fasilitas</h2>
                 <div className="flex flex-wrap gap-4">
                   {destination.facilities && destination.facilities.length > 0 ? (
-                    destination.facilities.map((facility) => {
+                    destination.facilities.map((facility: string) => {
                       const Icon = iconMap[facility] || ShieldCheck;
                       return (
                         <Badge
@@ -194,15 +210,13 @@ export default async function DestinasiDetailPage({
                 </div>
               </section>
 
+              {/* Ulasan */}
               <section>
                 <h2 className="text-2xl font-semibold mb-4">
                   Ulasan Pengunjung
                 </h2>
                 {user ? (
-                  <ReviewForm
-                    destinationId={destination.id}
-                    userId={user.id}
-                  />
+                  <ReviewForm destinationId={destination.id} userId={user.id} />
                 ) : (
                   <div className="text-center p-6 border-2 border-dashed rounded-lg mb-6">
                     <p className="text-muted-foreground">
@@ -221,6 +235,7 @@ export default async function DestinasiDetailPage({
               </section>
             </div>
 
+            
             <aside className="md:col-span-1 space-y-6 sticky top-24 h-fit">
               <Card className="shadow-none border">
                 <CardHeader>
@@ -246,11 +261,13 @@ export default async function DestinasiDetailPage({
                   </Button>
                 </CardContent>
               </Card>
+
               {destination.lat && destination.lng && (
                 <div className="h-64 rounded-lg overflow-hidden">
                   <MapComponent lat={destination.lat} lng={destination.lng} />
                 </div>
               )}
+
               {tips.length > 0 && (
                 <Card className="shadow-none border">
                   <CardHeader>
